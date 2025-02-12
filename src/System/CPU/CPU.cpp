@@ -2,19 +2,19 @@
 
 /* Private methods */
 void CPU::MOV(uint16_t data) {
-    bool isForRegistrar = (data & 0x0800) == 0;
-    data &= 0x07FF; // Máscara para tirar o bit de tipo da jogada
+    bool isForRegistrar = (data & MASK_TYPE_BIT) == 0;
+    data &= MASK_DATA; // Máscara para tirar o bit de tipo da jogada
     
-    int dest = (data >> 8) & 0x7;
+    int dest = (data & MASK_DEST) >> 8;
 
     if (isForRegistrar) {
         // Sequência na forma 0000 0RRR rrr- ----
-        int origin = (data >> 5) & 0x7;
+        int origin = (data & MASK_ORIGIN) >> 5;
 
         R[dest] = R[origin];
     } else {
         // Sequência na forma 0000 0RRR IIII IIII
-        R[dest] = data & 0xFF;
+        R[dest] = data & MASK_IMMEDIATE;
     }
 }
 

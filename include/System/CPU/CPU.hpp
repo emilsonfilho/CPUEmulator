@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "../Memory/Memory.hpp"
+#include "../Masks/CPUMasks.hpp"
 
 using namespace std;
 
