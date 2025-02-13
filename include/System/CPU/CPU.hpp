@@ -1,13 +1,13 @@
 #ifndef CPU_HPP
 #define CPU_HPP
 
-#include <string>
-#include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #include "../Memory/Memory.hpp"
-#include "../Masks/CPUMasks.hpp"
+#include "../../Masks/CPUMasks.hpp"
+#include "Flags.hpp"
 
 using namespace std;
 
@@ -18,6 +18,11 @@ class CPU {
     uint16_t IR = 0;
 
     Memory *memory;
+    Flags flags;
+
+    string generateLog() const;
+    void saveLogFile(const string& data) const;
+    string showRegisters() const;
 
     void NOP();
     void HALT();

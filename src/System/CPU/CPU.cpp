@@ -1,6 +1,62 @@
 #include "../../../include/System/CPU/CPU.hpp"
 
 /* Private methods */
+string CPU::generateLog() const {
+    ostringstream os;
+
+    os << "REGISTRADORES:\n"
+       << showRegisters();
+
+    os << endl;
+
+    os << "MEMORIA DE DADOS:\n"
+       << memory->toString();
+
+    os << endl;
+
+    os << "PILHA:\n"
+       << memory->getStack(SP);
+
+    os << endl;
+
+    os << "FLAGS:\n"
+       << flags.showFlags();
+
+    return os.str();
+}
+
+void CPU::saveLogFile(const string& data) const {
+    ofstream logfile("logs/log.txt");
+
+    if (!logfile) {
+        cerr << "Erro ao abrir o arquivo de log!\n";
+        return;
+    }
+
+    logfile << data;
+}
+
+string CPU::showRegisters() const {
+    ostringstream os;
+
+    for (int i = 0; i < 8; i++) {
+        os << "R" << hex << i << ": " << setw(4) << setfill('0') << R[i] << endl;
+    }
+
+    os << hex << "PC: " << setw(4) << setfill('0') << PC << endl
+       << "SP: " << setw(4) << setfill('0') << SP << endl
+       << "IR: " << setw(4) << setfill('0') << IR << endl;
+
+    return os.str();
+}
+
+void CPU::NOP() {
+    const string data = generateLog();
+    saveLogFile(data);
+
+    cout << data;
+}
+
 void CPU::MOV(uint16_t data) {
     bool isForRegistrar = (data & MASK_TYPE_BIT) == 0;
     data &= MASK_DATA; // Máscara para tirar o bit de tipo da jogada
@@ -34,6 +90,7 @@ void CPU::loadProgram(const string& filename) {
     string line;
     while (getline(file, line)) {
         uint16_t memoryAddress = stoi(line.substr(0, 4), nullptr, 16); // Armazena em hexadecimal o endereco de memoriab
+        memory->indexesAccessed.insert(memoryAddress);
 
         memory->write(memoryAddress, stoi(line.substr(8, 4), nullptr, 16)); // Armazena já na memória o dado que eu quero e o próximo
     }
@@ -43,6 +100,9 @@ void CPU::execute(uint16_t instruction) {
     uint8_t opcode = (instruction >> 12) & 0xF;
     switch (opcode)
     {
+    case 0x0000:
+        NOP();
+        break;
     case 0x1:
         MOV(instruction & 0x0FFF); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
         break;
