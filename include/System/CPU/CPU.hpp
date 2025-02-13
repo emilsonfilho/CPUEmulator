@@ -7,6 +7,7 @@
 
 #include "../Memory/Memory.hpp"
 #include "../../Masks/CPUMasks.hpp"
+#include "../../Utils/ClearTop4Bits.hpp"
 #include "Flags.hpp"
 
 using namespace std;

@@ -12,5 +12,6 @@ const uint16_t MASK_DEST_STR = 0x0700;
 const uint16_t MASK_ORIGIN_STR = 0x00E0;
 const uint16_t MASK_IMMEDIATE_STR = 0x071F;
 const uint16_t MASK_LSB_STR = 0x01F;
+const uint16_t MASK_MSB_STR = 0x0700;
 
 #endif

@@ -91,16 +91,11 @@ void CPU::STR(uint16_t data) {
         memory->write(R[dest], R[origin]);
     } else {
         // Sequência na forma 0000 0III RRRI IIII
-        uint16_t lsb = data & 
-
-        memory->write(R[dest], data & MASK_IMMEDIATE_STR);
+        memory->write(R[dest], (data & MASK_LSB_STR) | ((data & MASK_MSB_STR) >> 3));
     }
 }
 
 /* Public methods */
-
-
-
 CPU::CPU(Memory* memory): memory(memory) {}
 
 void CPU::loadProgram(const string& filename) {
@@ -116,6 +111,7 @@ void CPU::loadProgram(const string& filename) {
     while (getline(file, line)) {
         uint16_t memoryAddress = stoi(line.substr(0, 4), nullptr, 16); // Armazena em hexadecimal o endereco de memoriab
         memory->indexesAccessed.insert(memoryAddress);
+        memory->indexesAccessed.insert(memoryAddress + 1);
 
         memory->write(memoryAddress, stoi(line.substr(8, 4), nullptr, 16)); // Armazena já na memória o dado que eu quero e o próximo
     }
@@ -123,28 +119,37 @@ void CPU::loadProgram(const string& filename) {
 
 void CPU::execute(uint16_t instruction) {
     uint8_t opcode = (instruction >> 12) & 0xF;
+    uint16_t pureData = clearTop4Bits(instruction);
+
     switch (opcode)
     {
-    case 0x0000:
+    case 0x0:
         NOP();
         break;
-    case 0xFFFF:
-        HALT();
-        break;
     case 0x1:
-        MOV(instruction & 0x0FFF); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
+        MOV(pureData); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
         break;
     case 0x2:
-        STR(instruction & 0x0FFF);
+        STR(pureData);
         break;
-    
+    case 0xFF:
+        HALT();
+        break;
     default:
         break;
     }
 }
 
 void CPU::runProgram() {
-    execute(memory->read(PC));
+    while (PC < Memory::MEMORY_SIZE) {  // Verifica se o PC não ultrapassa o tamanho da memória
+        uint16_t instruction = memory->read(PC);
+        
+        if (instruction == 0xFFFF) {  // HALT pode ser identificado por um valor especial
+            HALT();
+            break;
+        }
 
-    PC += 2;
+        execute(instruction);
+        PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
+    }
 }
