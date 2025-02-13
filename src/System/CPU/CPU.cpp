@@ -40,10 +40,10 @@ string CPU::showRegisters() const {
     ostringstream os;
 
     for (int i = 0; i < 8; i++) {
-        os << "R" << hex << i << ": " << setw(4) << setfill('0') << R[i] << endl;
+        os << "R" << i << ": " << applyFormat(R[i]) << endl;
     }
 
-    os << hex << "PC: " << applyFormat(PC) << endl
+    os << "PC: " << applyFormat(PC) << endl
        << "SP: " << applyFormat(SP) << endl
        << "IR: " << applyFormat(IR) << endl;
 
@@ -82,7 +82,7 @@ void CPU::STR(uint16_t data) {
     bool isForRegister = (data & MASK_TYPE_BIT) == 0;
     data &= MASK_DATA;
 
-    int dest = (data & MASK_DEST_STR) >> 5;
+    uint16_t dest = (data & MASK_DEST_STR) >> 5;
 
     if (isForRegister) {
         // Sequência na forma 0000 0--- RRRr rr--
@@ -92,6 +92,7 @@ void CPU::STR(uint16_t data) {
     } else {
         // Sequência na forma 0000 0III RRRI IIII
         memory->write(R[dest], (data & MASK_LSB_STR) | ((data & MASK_MSB_STR) >> 3));
+        memory->indexesAccessed.insert(R[dest]);
     }
 }
 
@@ -119,7 +120,6 @@ void CPU::loadProgram(const string& filename) {
 
 void CPU::execute(uint16_t instruction) {
     uint8_t opcode = (instruction >> 12) & 0xF;
-    uint16_t pureData = clearTop4Bits(instruction);
 
     switch (opcode)
     {
@@ -127,10 +127,10 @@ void CPU::execute(uint16_t instruction) {
         NOP();
         break;
     case 0x1:
-        MOV(pureData); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
+        MOV(instruction); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
         break;
     case 0x2:
-        STR(pureData);
+        STR(instruction);
         break;
     case 0xFF:
         HALT();
