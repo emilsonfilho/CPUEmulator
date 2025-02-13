@@ -43,9 +43,9 @@ string CPU::showRegisters() const {
         os << "R" << hex << i << ": " << setw(4) << setfill('0') << R[i] << endl;
     }
 
-    os << hex << "PC: " << setw(4) << setfill('0') << PC << endl
-       << "SP: " << setw(4) << setfill('0') << SP << endl
-       << "IR: " << setw(4) << setfill('0') << IR << endl;
+    os << hex << "PC: " << applyFormat(PC) << endl
+       << "SP: " << applyFormat(SP) << endl
+       << "IR: " << applyFormat(IR) << endl;
 
     return os.str();
 }
@@ -74,7 +74,32 @@ void CPU::MOV(uint16_t data) {
     }
 }
 
+void CPU::HALT() {
+    exit(0);
+}
+
+void CPU::STR(uint16_t data) {
+    bool isForRegister = (data & MASK_TYPE_BIT) == 0;
+    data &= MASK_DATA;
+
+    int dest = (data & MASK_DEST_STR) >> 5;
+
+    if (isForRegister) {
+        // Sequência na forma 0000 0--- RRRr rr--
+        int origin = (data & MASK_ORIGIN_STR) >> 2;
+
+        memory->write(R[dest], R[origin]);
+    } else {
+        // Sequência na forma 0000 0III RRRI IIII
+        uint16_t lsb = data & 
+
+        memory->write(R[dest], data & MASK_IMMEDIATE_STR);
+    }
+}
+
 /* Public methods */
+
+
 
 CPU::CPU(Memory* memory): memory(memory) {}
 
@@ -103,8 +128,14 @@ void CPU::execute(uint16_t instruction) {
     case 0x0000:
         NOP();
         break;
+    case 0xFFFF:
+        HALT();
+        break;
     case 0x1:
         MOV(instruction & 0x0FFF); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
+        break;
+    case 0x2:
+        STR(instruction & 0x0FFF);
         break;
     
     default:

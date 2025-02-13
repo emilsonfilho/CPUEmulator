@@ -27,6 +27,7 @@ class CPU {
     void NOP();
     void HALT();
     void MOV(uint16_t data);
+    void STR(uint16_t data);
     void LRD();
     void ADD();
     void SUB();
