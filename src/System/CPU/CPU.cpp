@@ -96,6 +96,18 @@ void CPU::STR(uint16_t data) {
     }
 }
 
+void CPU::LDR(uint16_t data) {
+    /**
+     * Data na forma 0011 -RRR rrr- ----
+     * Máscara de isolamento é a mesma que a de MOV
+    */
+
+    int dest = (data & MASK_DEST) >> 8;
+    int origin = (data & MASK_ORIGIN) >> 5;
+
+    R[dest] = memory->read(R[origin]);
+}
+
 /* Public methods */
 CPU::CPU(Memory* memory): memory(memory) {}
 
@@ -131,6 +143,9 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0x2:
         STR(instruction);
+        break;
+    case 0x3:
+        LDR(instruction);
         break;
     case 0xFF:
         HALT();
