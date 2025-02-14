@@ -108,6 +108,16 @@ void CPU::LDR(uint16_t data) {
     R[dest] = memory->read(R[origin]);
 }
 
+void CPU::ADD(uint16_t data) {
+    data &= MASK_DATA;
+    
+    uint16_t dest = (data & MASK_DEST) >> 8;
+    uint16_t origin = (data & MASK_ORIGIN) >> 5;
+    uint16_t origin2 = data & MASK_ORIGIN_STR >> 2;
+
+    R[dest] = R[origin] + R[origin2];
+}
+
 /* Public methods */
 CPU::CPU(Memory* memory): memory(memory) {}
 
@@ -146,6 +156,9 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0x3:
         LDR(instruction);
+        break;
+    case 0x4:
+        ADD(instruction);
         break;
     case 0xFF:
         HALT();

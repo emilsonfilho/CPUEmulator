@@ -30,7 +30,7 @@ class CPU {
     void MOV(uint16_t data);
     void STR(uint16_t data);
     void LDR(uint16_t data);
-    void ADD();
+    void ADD(uint16_t data);
     void SUB();
     void MUL();
     void AND();
