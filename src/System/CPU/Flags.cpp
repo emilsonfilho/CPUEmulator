@@ -12,3 +12,10 @@ string Flags::showFlags() const {
 
     return os.str();
 }
+void Flags::setZero(uint32_t result)  {
+    Z = (result & 0xFFFF) == 0;
+}
+
+void Flags::setSign(uint32_t result) {
+    S = (result & 0x8000) != 0;
+}

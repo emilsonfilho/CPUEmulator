@@ -50,6 +50,27 @@ string CPU::showRegisters() const {
     return os.str();
 }
 
+void CPU::setFlags(uint32_t data) {
+    flags.setZero(data);
+    flags.setSign(data);
+}
+
+void CPU::setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction) {
+    bool signOp1 = (op1 & BIT_ISOLATION) != 0;
+    bool signOp2 = (op2 & BIT_ISOLATION) != 0;
+    bool signResult = (result & BIT_ISOLATION) != 0;
+
+    flags.Ov = (isSubstraction ? (signOp1 != signOp2) : (signOp1 = signOp2)) and (signOp1 != signResult);
+}
+
+void CPU::setCarryAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction) {
+    flags.C = (isSubstraction ? op1 >= op2 : result > UPPER_LIMIT_REPRESENTATION);
+}
+
+void CPU::setCarryMul(int32_t result) {
+    flags.C = result > UPPER_LIMIT_REPRESENTATION;
+}
+
 void CPU::NOP() {
     const string data = generateLog();
     saveLogFile(data);
@@ -120,17 +141,11 @@ void CPU::ADD(uint16_t data) {
 
     uint32_t result = (uint32_t)op1 + (uint32_t)op2;
 
-    R[dest] = (uint32_t)(result & UPPER_LIMIT_REPRESENTATION);
+    R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
 
-    flags.C = ((result > UPPER_LIMIT_REPRESENTATION));
-    flags.Z = (result & UPPER_LIMIT_REPRESENTATION) == 0;
-    flags.S = (result & BIT_ISOLATION) != 0;
-
-    bool signOp1 = (op1 & BIT_ISOLATION) != 0;
-    bool signOp2 = (op2 & BIT_ISOLATION) != 0;
-    bool signResult = (result & BIT_ISOLATION) != 0;
-
-    flags.Ov = (signOp1 == signOp2) and (signOp1 != signResult);
+    setCarryAddSub(op1, op2, result, false);
+    setFlags(result);
+    setOverflowAddSub(op1, op2, result, false);
 }
 
 void CPU::SUB(uint16_t data) {
@@ -147,15 +162,30 @@ void CPU::SUB(uint16_t data) {
 
     R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
 
-    flags.C = op1 >= op2;
-    flags.Z = (result & UPPER_LIMIT_REPRESENTATION) == 0;
-    flags.S = (result & BIT_ISOLATION) != 0;
+    setCarryAddSub(op1, op2, result, true);
+    setFlags(result);
+    setOverflowAddSub(op1, op2, result, true);
+}
 
-    bool signOp1 = (op1 & BIT_ISOLATION) != 0;
-    bool signOp2 = (op2 & BIT_ISOLATION) != 0;
-    bool signResult = (result & BIT_ISOLATION) != 0;
+void CPU::MUL(uint16_t data) {
+    data &= MASK_DATA;
+    
+    uint16_t dest = (data & MASK_DEST) >> 8;
+    uint16_t origin = (data & MASK_ORIGIN) >> 5;
+    uint16_t origin2 = (data & MASK_ORIGIN_STR) >> 2;
 
-    flags.Ov = (signOp1 != signOp2) and (signOp1 != signResult);
+    int16_t op1 = (int16_t)R[origin];
+    int16_t op2 = (int16_t)R[origin2];
+
+    int32_t result = (int32_t)op1 * (int32_t)op2;
+
+    R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
+
+    int16_t minValue = 0x8000, maxValue = 0x7FFF;
+    flags.Ov = (result < minValue) or (result > maxValue);
+
+    flags.C = result > UPPER_LIMIT_REPRESENTATION;
+    setFlags(result);
 }
 
 /* Public methods */

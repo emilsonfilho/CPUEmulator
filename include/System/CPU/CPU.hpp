@@ -25,6 +25,11 @@ class CPU {
     void saveLogFile(const string& data) const;
     string showRegisters() const;
 
+    void setFlags(uint32_t data);
+    void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
+    void setCarryAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
+    void setCarryMul(int32_t result);
+
     void NOP();
     void HALT();
     void MOV(uint16_t data);
@@ -32,7 +37,7 @@ class CPU {
     void LDR(uint16_t data);
     void ADD(uint16_t data);
     void SUB(uint16_t data);
-    void MUL();
+    void MUL(uint16_t data);
     void AND();
     void ORR();
     void NOT();
