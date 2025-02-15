@@ -1,7 +1,7 @@
 REGISTRADORES:
-R0: 0x0000
-R1: 0x0001
-R2: 0xffff
+R0: 0x00ff
+R1: 0x00ff
+R2: 0xfe01
 R3: 0x0000
 R4: 0x0000
 R5: 0x0000
@@ -12,9 +12,9 @@ SP: 0x8200
 IR: 0x0000
 
 MEMORIA DE DADOS:
-0000: 0x1800
-0002: 0x1901
-0004: 0x5204
+0000: 0x18ff
+0002: 0x19ff
+0004: 0x6220
 0006: 0x0000
 0008: 0xffff
 
@@ -22,4 +22,4 @@ PILHA:
 <empty>
 
 FLAGS:
-- - - S 
+- Ov - S 

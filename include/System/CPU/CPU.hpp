@@ -50,7 +50,7 @@ class CPU {
     void ADD(uint16_t data);
     void SUB(uint16_t data);
     void MUL(uint16_t data);
-    void AND();
+    void AND(uint16_t data);
     void ORR();
     void NOT();
     void XOR();

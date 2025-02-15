@@ -83,8 +83,8 @@ UnsignedOperands CPU::getUnsignedOperands(uint16_t numberRegister1, uint16_t num
 SignedOperands CPU::getSignedOperands(uint16_t numberRegister1, uint16_t numberRegister2) {
     SignedOperands operands;
 
-    operands.op1 = (int16_t)R[numberRegister1];
-    operands.op2 = (int16_t)R[numberRegister2];
+    operands.op1 = static_cast<int16_t>(R[numberRegister1]);
+    operands.op2 = static_cast<int16_t>(R[numberRegister2]);
 
     return operands;
 }
@@ -199,7 +199,7 @@ void CPU::MUL(uint16_t data) {
     data = applyMask(data);
 
     uint16_t dest = getULADestination(data);
-    auto [op1, op2] = getUnsignedOperandsFromData(data);
+    auto [op1, op2] = getSignedOperandsFromData(data);
 
     int32_t result = (int32_t)op1 * (int32_t)op2;
 
@@ -209,6 +209,19 @@ void CPU::MUL(uint16_t data) {
     flags.Ov = (result < minValue) or (result > maxValue);
 
     setCarryMul(result);
+    setFlags(result);
+}
+
+void CPU::AND(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
+
+    uint16_t result = op1 & op2;
+
+    setResultInRegister(result, dest);    
+
     setFlags(result);
 }
 
@@ -270,6 +283,12 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0x5:
         SUB(instruction);
+        break;
+    case 0x6:
+        MUL(instruction);
+        break;
+    case 0x7:
+        AND(instruction);
         break;
     case 0xFF:
         HALT();
