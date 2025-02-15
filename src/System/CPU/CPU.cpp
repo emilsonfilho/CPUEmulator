@@ -259,7 +259,7 @@ void CPU::NOT(uint16_t data) {
     setFlags(result);
 }
 
-void CPU::feavXOR(uint16_t data) {
+void CPU::XOR(uint16_t data) {
     data = applyMask(data);
 
     uint16_t dest = getULADestination(data);
