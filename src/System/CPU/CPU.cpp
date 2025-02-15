@@ -245,6 +245,34 @@ void CPU::ORR(uint16_t data) {
     setFlags(result);
 }
 
+void CPU::NOT(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, _] = getUnsignedOperandsFromData(data);
+
+    uint16_t result = ~op1;
+
+    setResultInRegister(result, dest);
+
+    cleanCarryAndOverflow();
+    setFlags(result);
+}
+
+void CPU::XOR(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
+
+    uint16_t result = op1 ^ op2;
+
+    setResultInRegister(result, dest);
+
+    cleanCarryAndOverflow();
+    setFlags(result);
+}
+
 /* Public methods */
 AddressOperands CPU::decodeAddressOperands(uint16_t data) {
     AddressOperands operands;
@@ -312,6 +340,12 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0x8:
         ORR(instruction);
+        break;
+    case 0x9:
+        NOT(instruction);
+        break;
+    case 0xA:
+        XOR(instruction);
         break;
     case 0xFF:
         HALT();
