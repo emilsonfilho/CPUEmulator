@@ -37,10 +37,14 @@ class CPU {
 
     void setResultInRegister(uint32_t result, uint16_t address);
 
+    uint8_t getShiftImmediate(uint16_t data);
+
     void setFlags(uint32_t data);
     void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
     void setCarryAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
     void setCarryMul(int32_t result);
+    void setShiftCarry(uint16_t op1, bool isMSB = true);
+    void cleanOverflow();
     void cleanCarryAndOverflow();
 
     void NOP();
@@ -62,8 +66,8 @@ class CPU {
     void JEQ();
     void JLT();
     void JGT();
-    void SHR();
-    void SHL();
+    void SHR(uint16_t data);
+    void SHL(uint16_t data);
     void ROR();
     void ROL();
 

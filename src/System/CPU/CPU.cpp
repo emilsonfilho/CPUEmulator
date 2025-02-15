@@ -71,9 +71,17 @@ void CPU::setCarryMul(int32_t result) {
     flags.C = result > UPPER_LIMIT_REPRESENTATION;
 }
 
+void CPU::setShiftCarry(uint16_t op1, bool isMSB) {
+    flags.C = (isMSB ? (op1 & MSB_ISOLATION_MASK) : (op1 & LSB_ISOLATION_MASK)) != 0;
+}
+
+void CPU::cleanOverflow() {
+    flags.Ov = false;
+}
+
 void CPU::cleanCarryAndOverflow() {
     flags.C = false;
-    flags.Ov = false;
+    cleanOverflow();
 }
 
 UnsignedOperands CPU::getUnsignedOperands(uint16_t numberRegister1, uint16_t numberRegister2) {
@@ -110,6 +118,10 @@ void CPU::setResultInRegister(uint32_t result, uint16_t address) {
 
 uint16_t CPU::getULADestination(uint16_t data) {
     return (data & MASK_DEST) >> 8;
+}
+
+uint8_t CPU::getShiftImmediate(uint16_t data) {
+    return (data & MASK_IMMEDIATE_SHIFT);
 }
 
 void CPU::NOP() {
@@ -273,6 +285,38 @@ void CPU::XOR(uint16_t data) {
     setFlags(result);
 }
 
+void CPU::SHR(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, _] = getUnsignedOperandsFromData(data);
+
+    setShiftCarry(op1, false);
+
+    uint16_t result = op1 >> getShiftImmediate(data);
+
+    setResultInRegister(result, dest);
+
+    cleanOverflow();
+    setFlags(result);
+}
+
+void CPU::SHL(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, _] = getUnsignedOperandsFromData(data);
+
+    setShiftCarry(op1);
+
+    uint16_t result = op1 << getShiftImmediate(data);
+
+    setResultInRegister(result, dest);
+
+    cleanOverflow();
+    setFlags(result);
+}
+
 /* Public methods */
 AddressOperands CPU::decodeAddressOperands(uint16_t data) {
     AddressOperands operands;
@@ -346,6 +390,12 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0xA:
         XOR(instruction);
+        break;
+    case 0xB:
+        SHR(instruction);
+        break;
+    case 0xC:
+        SHL(instruction);
         break;
     case 0xFF:
         HALT();
