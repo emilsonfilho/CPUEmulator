@@ -53,7 +53,7 @@ class CPU {
     void MUL(uint16_t data);
     void AND(uint16_t data);
     void ORR(uint16_t data);
-    void NOT();
+    void NOT(uint16_t data);
     void XOR();
     void PSH();
     void POP();
