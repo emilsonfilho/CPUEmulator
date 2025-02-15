@@ -71,6 +71,11 @@ void CPU::setCarryMul(int32_t result) {
     flags.C = result > UPPER_LIMIT_REPRESENTATION;
 }
 
+void CPU::cleanCarryAndOverflow() {
+    flags.C = false;
+    flags.Ov = false;
+}
+
 UnsignedOperands CPU::getUnsignedOperands(uint16_t numberRegister1, uint16_t numberRegister2) {
     UnsignedOperands operands;
 
@@ -222,6 +227,21 @@ void CPU::AND(uint16_t data) {
 
     setResultInRegister(result, dest);    
 
+    cleanCarryAndOverflow();
+    setFlags(result);
+}
+
+void CPU::ORR(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
+
+    uint16_t result = op1 | op2;
+
+    setResultInRegister(result, dest);
+
+    cleanCarryAndOverflow();
     setFlags(result);
 }
 
@@ -289,6 +309,9 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0x7:
         AND(instruction);
+        break;
+    case 0x8:
+        ORR(instruction);
         break;
     case 0xFF:
         HALT();

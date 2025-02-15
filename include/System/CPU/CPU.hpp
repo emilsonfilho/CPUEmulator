@@ -41,6 +41,7 @@ class CPU {
     void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
     void setCarryAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
     void setCarryMul(int32_t result);
+    void cleanCarryAndOverflow();
 
     void NOP();
     void HALT();
@@ -51,7 +52,7 @@ class CPU {
     void SUB(uint16_t data);
     void MUL(uint16_t data);
     void AND(uint16_t data);
-    void ORR();
+    void ORR(uint16_t data);
     void NOT();
     void XOR();
     void PSH();
