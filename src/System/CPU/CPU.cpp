@@ -71,6 +71,42 @@ void CPU::setCarryMul(int32_t result) {
     flags.C = result > UPPER_LIMIT_REPRESENTATION;
 }
 
+UnsignedOperands CPU::getUnsignedOperands(uint16_t numberRegister1, uint16_t numberRegister2) {
+    UnsignedOperands operands;
+
+    operands.op1 = R[numberRegister1];
+    operands.op2 = R[numberRegister2];
+
+    return operands;
+}
+
+SignedOperands CPU::getSignedOperands(uint16_t numberRegister1, uint16_t numberRegister2) {
+    SignedOperands operands;
+
+    operands.op1 = (int16_t)R[numberRegister1];
+    operands.op2 = (int16_t)R[numberRegister2];
+
+    return operands;
+}
+
+UnsignedOperands CPU::getUnsignedOperandsFromData(uint16_t data) {
+    auto [origin, origin2] = decodeAddressOperands(data);
+    return getUnsignedOperands(origin, origin2);
+}
+
+SignedOperands CPU::getSignedOperandsFromData(uint16_t data) {
+    auto [origin, origin2] = decodeAddressOperands(data);
+    return getSignedOperands(origin, origin2);
+}
+
+void CPU::setResultInRegister(uint32_t result, uint16_t address) {
+    R[address] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
+}
+
+uint16_t CPU::getULADestination(uint16_t data) {
+    return (data & MASK_DEST) >> 8;
+}
+
 void CPU::NOP() {
     const string data = generateLog();
     saveLogFile(data);
@@ -80,7 +116,7 @@ void CPU::NOP() {
 
 void CPU::MOV(uint16_t data) {
     bool isForRegistrar = (data & MASK_TYPE_BIT) == 0;
-    data &= MASK_DATA; // Máscara para tirar o bit de tipo da jogada
+    data = applyMask(data); // Máscara para tirar o bit de tipo da jogada
     
     int dest = (data & MASK_DEST) >> 8;
 
@@ -101,7 +137,7 @@ void CPU::HALT() {
 
 void CPU::STR(uint16_t data) {
     bool isForRegister = (data & MASK_TYPE_BIT) == 0;
-    data &= MASK_DATA;
+    data = applyMask(data);
 
     uint16_t dest = (data & MASK_DEST_STR) >> 5;
 
@@ -130,18 +166,14 @@ void CPU::LDR(uint16_t data) {
 }
 
 void CPU::ADD(uint16_t data) {
-    data &= MASK_DATA;
+    data = applyMask(data);
     
-    uint16_t dest = (data & MASK_DEST) >> 8;
-    uint16_t origin = (data & MASK_ORIGIN) >> 5;
-    uint16_t origin2 = (data & MASK_ORIGIN_STR) >> 2;
-
-    uint16_t op1 = R[origin];
-    uint16_t op2 = R[origin2];
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
 
     uint32_t result = (uint32_t)op1 + (uint32_t)op2;
 
-    R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
+    setResultInRegister(result, dest);
 
     setCarryAddSub(op1, op2, result, false);
     setFlags(result);
@@ -149,18 +181,14 @@ void CPU::ADD(uint16_t data) {
 }
 
 void CPU::SUB(uint16_t data) {
-    data &= MASK_DATA;
+    data = applyMask(data);
     
-    uint16_t dest = (data & MASK_DEST) >> 8;
-    uint16_t origin = (data & MASK_ORIGIN) >> 5;
-    uint16_t origin2 = (data & MASK_ORIGIN_STR) >> 2;
-
-    uint16_t op1 = R[origin];
-    uint16_t op2 = R[origin2];
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
 
     uint32_t result = (uint32_t)op1 - (uint32_t)op2;
 
-    R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
+    setResultInRegister(result, dest);
 
     setCarryAddSub(op1, op2, result, true);
     setFlags(result);
@@ -168,27 +196,36 @@ void CPU::SUB(uint16_t data) {
 }
 
 void CPU::MUL(uint16_t data) {
-    data &= MASK_DATA;
-    
-    uint16_t dest = (data & MASK_DEST) >> 8;
-    uint16_t origin = (data & MASK_ORIGIN) >> 5;
-    uint16_t origin2 = (data & MASK_ORIGIN_STR) >> 2;
+    data = applyMask(data);
 
-    int16_t op1 = (int16_t)R[origin];
-    int16_t op2 = (int16_t)R[origin2];
+    uint16_t dest = getULADestination(data);
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
 
     int32_t result = (int32_t)op1 * (int32_t)op2;
 
-    R[dest] = (uint16_t)(result & UPPER_LIMIT_REPRESENTATION);
+    setResultInRegister(result, dest);
 
     int16_t minValue = 0x8000, maxValue = 0x7FFF;
     flags.Ov = (result < minValue) or (result > maxValue);
 
-    flags.C = result > UPPER_LIMIT_REPRESENTATION;
+    setCarryMul(result);
     setFlags(result);
 }
 
 /* Public methods */
+AddressOperands CPU::decodeAddressOperands(uint16_t data) {
+    AddressOperands operands;
+
+    operands.origin = (data & MASK_ORIGIN) >> 5;
+    operands.origin2 = (data & MASK_ORIGIN_STR) >> 2;
+
+    return operands;
+}
+
+uint16_t CPU::applyMask(uint16_t data) {
+    return (data & MASK_DATA);
+}
+
 CPU::CPU(Memory* memory): memory(memory) {}
 
 void CPU::loadProgram(const string& filename) {
