@@ -9,6 +9,8 @@
 #include "../../Masks/CPUMasks.hpp"
 #include "../../Utils/ClearTop4Bits.hpp"
 #include "Flags.hpp"
+#include "AddressOperands.hpp"
+#include "Operands.hpp"
 
 using namespace std;
 
@@ -25,16 +27,32 @@ class CPU {
     void saveLogFile(const string& data) const;
     string showRegisters() const;
 
+    UnsignedOperands getUnsignedOperands(uint16_t numberRegister1, uint16_t numberRegister2);
+    SignedOperands getSignedOperands(uint16_t numberRegister1, uint16_t numberRegister2);
+
+    UnsignedOperands getUnsignedOperandsFromData(uint16_t data);
+    SignedOperands getSignedOperandsFromData(uint16_t data);
+
+    uint16_t getULADestination(uint16_t data);
+
+    void setResultInRegister(uint32_t result, uint16_t address);
+
+    void setFlags(uint32_t data);
+    void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
+    void setCarryAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
+    void setCarryMul(int32_t result);
+    void cleanCarryAndOverflow();
+
     void NOP();
     void HALT();
     void MOV(uint16_t data);
     void STR(uint16_t data);
     void LDR(uint16_t data);
     void ADD(uint16_t data);
-    void SUB();
-    void MUL();
-    void AND();
-    void ORR();
+    void SUB(uint16_t data);
+    void MUL(uint16_t data);
+    void AND(uint16_t data);
+    void ORR(uint16_t data);
     void NOT();
     void XOR();
     void PSH();
@@ -51,6 +69,9 @@ class CPU {
 
     void execute(uint16_t instruction);
 public:
+    static AddressOperands decodeAddressOperands(uint16_t data);
+    static uint16_t applyMask(uint16_t data);
+
     CPU(Memory* memory);
     
     void loadProgram(const string& filename);

@@ -13,7 +13,7 @@ const uint16_t MASK_ORIGIN_STR = 0x001C;
 const uint16_t MASK_IMMEDIATE_STR = 0x071F;
 const uint16_t MASK_LSB_STR = 0x001F;
 const uint16_t MASK_MSB_STR = 0x0700;
-const uint16_t UPPER_LIMIT_REPRESENTATION = 0x00FF;
-const uint16_t SEVENTH_BIT_ISOLATION_MASK = 0x0080;
+const uint16_t UPPER_LIMIT_REPRESENTATION = 0xFFFF;
+const uint16_t BIT_ISOLATION = 0x8000;
 
 #endif

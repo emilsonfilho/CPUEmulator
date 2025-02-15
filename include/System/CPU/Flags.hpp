@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <cstdint>
 
 using namespace std;
 
@@ -14,6 +15,10 @@ struct Flags
     bool S = false; // 
     
     string showFlags() const;
+
+    void setZero(uint32_t result);
+
+    void setSign(uint32_t result);
 };
 
 
