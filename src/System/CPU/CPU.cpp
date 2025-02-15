@@ -112,10 +112,21 @@ void CPU::ADD(uint16_t data) {
     data &= MASK_DATA;
     
     uint16_t dest = (data & MASK_DEST) >> 8;
-    uint16_t origin = (data & MASK_ORIGIN) >> 5;
-    uint16_t origin2 = data & MASK_ORIGIN_STR >> 2;
 
-    R[dest] = R[origin] + R[origin2];
+    uint16_t origin = (data & MASK_ORIGIN) >> 5;
+    uint16_t origin2 = (data & MASK_ORIGIN_STR) >> 2;
+
+    uint16_t op1 = R[origin] & UPPER_LIMIT_REPRESENTATION;
+    uint16_t op2 = R[origin2] & UPPER_LIMIT_REPRESENTATION;
+
+    uint16_t result = op1 + op2;;
+
+    R[dest] = result & UPPER_LIMIT_REPRESENTATION;
+
+    flags.C = ((result > 0xFF));
+    flags.Z = (result & UPPER_LIMIT_REPRESENTATION) == 0;
+    flags.S = ((result & SEVENTH_BIT_ISOLATION_MASK) >> 7) != 0;
+    flags.Ov = ((op1 & SEVENTH_BIT_ISOLATION_MASK) == (op2 & SEVENTH_BIT_ISOLATION_MASK)) && ((op1 & SEVENTH_BIT_ISOLATION_MASK) != (result & SEVENTH_BIT_ISOLATION_MASK));
 }
 
 /* Public methods */
