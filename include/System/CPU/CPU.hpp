@@ -68,13 +68,15 @@ class CPU {
     void JGT();
     void SHR(uint16_t data);
     void SHL(uint16_t data);
-    void ROR();
-    void ROL();
+    void ROR(uint16_t data);
+    void ROL(uint16_t data);
 
     void execute(uint16_t instruction);
 public:
     static AddressOperands decodeAddressOperands(uint16_t data);
     static uint16_t applyMask(uint16_t data);
+    static uint8_t getMSB(uint16_t data);
+    static uint8_t getLSB(uint16_t data);
 
     CPU(Memory* memory);
     

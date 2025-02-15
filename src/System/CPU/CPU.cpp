@@ -72,7 +72,7 @@ void CPU::setCarryMul(int32_t result) {
 }
 
 void CPU::setShiftCarry(uint16_t op1, bool isMSB) {
-    flags.C = (isMSB ? (op1 & MSB_ISOLATION_MASK) : (op1 & LSB_ISOLATION_MASK)) != 0;
+    flags.C = (isMSB ? (getMSB(op1)) : (getLSB(op1))) != 0;
 }
 
 void CPU::cleanOverflow() {
@@ -317,6 +317,48 @@ void CPU::SHL(uint16_t data) {
     setFlags(result);
 }
 
+void CPU::ROR(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, _] = getUnsignedOperandsFromData(data);
+
+    uint16_t op1LSB = getLSB(op1);
+
+    setShiftCarry(op1, false);
+
+    uint16_t result = op1 >> 1;
+    
+    if (op1LSB == 1)
+        result = result | 0x8000;
+
+    setResultInRegister(result, dest);
+
+    cleanOverflow();
+    setFlags(result);
+}
+
+void CPU::ROL(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t dest = getULADestination(data);
+    auto [op1, _] = getUnsignedOperandsFromData(data);
+
+    uint16_t op1MSB = getMSB(op1);
+
+    setShiftCarry(op1);
+
+    uint16_t result = op1 << 1;
+
+    if (op1MSB == 1)
+        result = result | 0x0001;
+    
+    setResultInRegister(result, dest);
+    
+    cleanOverflow();
+    setFlags(result);
+}
+
 /* Public methods */
 AddressOperands CPU::decodeAddressOperands(uint16_t data) {
     AddressOperands operands;
@@ -329,6 +371,14 @@ AddressOperands CPU::decodeAddressOperands(uint16_t data) {
 
 uint16_t CPU::applyMask(uint16_t data) {
     return (data & MASK_DATA);
+}
+
+uint8_t CPU::getMSB(uint16_t data) {
+    return ((data & MSB_ISOLATION_MASK) >> 15);
+}
+
+uint8_t CPU::getLSB(uint16_t data) {
+    return (data & LSB_ISOLATION_MASK);
 }
 
 CPU::CPU(Memory* memory): memory(memory) {}
@@ -396,6 +446,12 @@ void CPU::execute(uint16_t instruction) {
         break;
     case 0xC:
         SHL(instruction);
+        break;
+    case 0xD:
+        ROR(instruction);
+        break;
+    case 0xE:
+        ROL(instruction);
         break;
     case 0xFF:
         HALT();
