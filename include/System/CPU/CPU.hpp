@@ -31,7 +31,7 @@ class CPU {
     void STR(uint16_t data);
     void LDR(uint16_t data);
     void ADD(uint16_t data);
-    void SUB();
+    void SUB(uint16_t data);
     void MUL();
     void AND();
     void ORR();
