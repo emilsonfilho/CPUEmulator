@@ -18,5 +18,6 @@ const uint16_t BIT_ISOLATION = 0x8000;
 const uint16_t MASK_IMMEDIATE_SHIFT = 0x001F;
 const uint16_t MSB_ISOLATION_MASK = 0x8000;
 const uint16_t LSB_ISOLATION_MASK = 0x0001;
+const uint16_t DIFFERENTIATION_PAIR_BIT = 0x0003;
 
 #endif

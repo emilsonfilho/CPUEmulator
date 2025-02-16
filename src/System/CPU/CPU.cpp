@@ -285,6 +285,30 @@ void CPU::XOR(uint16_t data) {
     setFlags(result);
 }
 
+void CPU::PSH(uint16_t data) {
+    if (SP <= 0x81F0)
+        throw StackOverflowException();
+
+    data = applyMask(data);
+
+    auto [_, op] = getUnsignedOperandsFromData(data);
+
+    memory->write(SP, op);
+    SP -= 2;
+}
+
+void CPU::POP(uint16_t data) {
+    if (SP >= 0x8200)
+        throw StackUnderflowException();
+
+    data = applyMask(data);
+
+    SP += 2;
+
+    uint16_t dest = getULADestination(data);
+    setResultInRegister(memory->read(SP), dest);
+}
+
 void CPU::SHR(uint16_t data) {
     data = applyMask(data);
 
@@ -408,9 +432,40 @@ void CPU::execute(uint16_t instruction) {
 
     switch (opcode)
     {
-    case 0x0:
-        NOP();
+    case 0x0: {
+        if (instruction == 0x00000) {
+            NOP();
+            break;
+        }
+
+        uint8_t typeBit = ((instruction & MASK_TYPE_BIT) >> 10);
+        if (typeBit == 0) {
+            /**
+             * Três opções;
+             * PSH, POP e CMP
+             */
+            uint8_t diffBit = (instruction & DIFFERENTIATION_PAIR_BIT);
+            switch (diffBit)
+            {
+            case 0x1:
+                PSH(instruction);
+                break;
+            case 0x2:
+                POP(instruction);
+                break;
+            case 0x3:
+                break;
+            default:
+                break;
+            }
+        } else {
+            /**
+             * Quatro opções:
+             * JMP, JEQ, JLT, JGT
+             */
+        }
         break;
+    }
     case 0x1:
         MOV(instruction); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
         break;
@@ -457,6 +512,7 @@ void CPU::execute(uint16_t instruction) {
         HALT();
         break;
     default:
+
         break;
     }
 }
