@@ -12,6 +12,9 @@
 #include "AddressOperands.hpp"
 #include "Operands.hpp"
 
+#include "../../Exceptions/StackOverflowException.hpp"
+#include "../../Exceptions/StackUnderflowException.hpp"
+
 using namespace std;
 
 class CPU {
@@ -59,8 +62,8 @@ class CPU {
     void ORR(uint16_t data);
     void NOT(uint16_t data);
     void XOR(uint16_t data);
-    void PSH();
-    void POP();
+    void PSH(uint16_t data);
+    void POP(uint16_t data);
     void CMP();
     void JMP();
     void JEQ();
