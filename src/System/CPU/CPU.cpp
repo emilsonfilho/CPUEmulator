@@ -512,6 +512,8 @@ void CPU::execute(uint16_t instruction) {
             case 0x2:
                 JLT(instruction);
                 break;
+            case 0x3:
+                JGT(instruction);
             default:
                 break;
             }
