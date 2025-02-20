@@ -124,6 +124,10 @@ uint8_t CPU::getShiftImmediate(uint16_t data) {
     return (data & MASK_IMMEDIATE_SHIFT);
 }
 
+uint8_t CPU::getDifferentiationBit(uint16_t instruction) {
+    return (instruction & DIFFERENTIATION_PAIR_BIT);
+}
+
 void CPU::NOP() {
     const string data = generateLog();
     saveLogFile(data);
@@ -309,6 +313,38 @@ void CPU::POP(uint16_t data) {
     setResultInRegister(memory->read(SP), dest);
 }
 
+void CPU::CMP(uint16_t data) {
+    data = applyMask(data);
+
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
+
+    flags.Z = (op1 == op2) ? true : false;
+    flags.C = (op1 < op2) ? true : false;
+}
+
+void CPU::JMP(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
+
+    PC += immediate;
+}
+
+void CPU::JEQ(uint16_t data) {
+    if (flags.Z and !flags.S)
+        JMP(data);
+}
+
+void CPU::JLT(uint16_t data) {
+    if (!flags.Z and flags.S)
+        JMP(data);
+}
+
+void CPU::JGT(uint16_t data) {
+    if (!flags.Z and !flags.S)
+        JMP(data);
+}
+
 void CPU::SHR(uint16_t data) {
     data = applyMask(data);
 
@@ -444,7 +480,7 @@ void CPU::execute(uint16_t instruction) {
              * Três opções;
              * PSH, POP e CMP
              */
-            uint8_t diffBit = (instruction & DIFFERENTIATION_PAIR_BIT);
+            uint8_t diffBit = getDifferentiationBit(instruction);
             switch (diffBit)
             {
             case 0x1:
@@ -454,6 +490,7 @@ void CPU::execute(uint16_t instruction) {
                 POP(instruction);
                 break;
             case 0x3:
+                CMP(instruction);
                 break;
             default:
                 break;
@@ -463,6 +500,21 @@ void CPU::execute(uint16_t instruction) {
              * Quatro opções:
              * JMP, JEQ, JLT, JGT
              */
+            uint8_t diffBit = getDifferentiationBit(instruction);
+            switch (diffBit)
+            {
+            case 0x0:
+                JMP(instruction);
+                break;
+            case 0x1:
+                JEQ(instruction);
+                break;
+            case 0x2:
+                JLT(instruction);
+                break;
+            default:
+                break;
+            }
         }
         break;
     }
@@ -526,7 +578,11 @@ void CPU::runProgram() {
             break;
         }
 
+        uint16_t oldPC = PC;
+
         execute(instruction);
-        PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
+
+        if (oldPC == PC)
+            PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
     }
 }

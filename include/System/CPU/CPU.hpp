@@ -41,6 +41,7 @@ class CPU {
     void setResultInRegister(uint32_t result, uint16_t address);
 
     uint8_t getShiftImmediate(uint16_t data);
+    uint8_t getDifferentiationBit(uint16_t instruction);
 
     void setFlags(uint32_t data);
     void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);
@@ -64,11 +65,11 @@ class CPU {
     void XOR(uint16_t data);
     void PSH(uint16_t data);
     void POP(uint16_t data);
-    void CMP();
-    void JMP();
-    void JEQ();
-    void JLT();
-    void JGT();
+    void CMP(uint16_t data);
+    void JMP(uint16_t data);
+    void JEQ(uint16_t data);
+    void JLT(uint16_t data);
+    void JGT(uint16_t data);
     void SHR(uint16_t data);
     void SHL(uint16_t data);
     void ROR(uint16_t data);
