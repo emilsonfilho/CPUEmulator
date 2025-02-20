@@ -331,6 +331,11 @@ void CPU::JEQ(uint16_t data) {
         JMP(data);
 }
 
+void CPU::JLT(uint16_t data) {
+    if (!flags.Z and flags.C)
+        JMP(data);
+}
+
 void CPU::SHR(uint16_t data) {
     data = applyMask(data);
 
