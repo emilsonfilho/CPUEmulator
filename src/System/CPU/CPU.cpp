@@ -327,7 +327,8 @@ void CPU::JMP(uint16_t data) {
 }
 
 void CPU::JEQ(uint16_t data) {
-
+    if (flags.Z and !flags.S)
+        JMP(data);
 }
 
 void CPU::SHR(uint16_t data) {
