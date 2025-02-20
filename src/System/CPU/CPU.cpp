@@ -318,6 +318,14 @@ void CPU::CMP(uint16_t data) {
     flags.C = (op1 < op2) ? true : false;
 }
 
+void CPU::JMP(uint16_t data) {
+    data = applyMask(data);
+
+    uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
+
+    PC = PC + immediate;
+}
+
 void CPU::SHR(uint16_t data) {
     data = applyMask(data);
 

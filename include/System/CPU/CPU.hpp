@@ -65,7 +65,7 @@ class CPU {
     void PSH(uint16_t data);
     void POP(uint16_t data);
     void CMP(uint16_t data);
-    void JMP();
+    void JMP(uint16_t data);
     void JEQ();
     void JLT();
     void JGT();
