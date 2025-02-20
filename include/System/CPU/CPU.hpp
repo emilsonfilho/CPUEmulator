@@ -41,6 +41,7 @@ class CPU {
     void setResultInRegister(uint32_t result, uint16_t address);
 
     uint8_t getShiftImmediate(uint16_t data);
+    uint8_t getDifferentiationBit(uint16_t instruction);
 
     void setFlags(uint32_t data);
     void setOverflowAddSub(uint16_t op1, uint16_t op2, uint32_t result, bool isSubstraction);

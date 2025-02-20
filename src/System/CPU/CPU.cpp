@@ -124,6 +124,10 @@ uint8_t CPU::getShiftImmediate(uint16_t data) {
     return (data & MASK_IMMEDIATE_SHIFT);
 }
 
+uint8_t CPU::getDifferentiationBit(uint16_t instruction) {
+    return (instruction & DIFFERENTIATION_PAIR_BIT);
+}
+
 void CPU::NOP() {
     const string data = generateLog();
     saveLogFile(data);
@@ -471,7 +475,7 @@ void CPU::execute(uint16_t instruction) {
              * Três opções;
              * PSH, POP e CMP
              */
-            uint8_t diffBit = (instruction & DIFFERENTIATION_PAIR_BIT);
+            uint8_t diffBit = getDifferentiationBit(instruction);
             switch (diffBit)
             {
             case 0x1:
@@ -491,6 +495,21 @@ void CPU::execute(uint16_t instruction) {
              * Quatro opções:
              * JMP, JEQ, JLT, JGT
              */
+            uint8_t diffBit = getDifferentiationBit(instruction);
+            switch (diffBit)
+            {
+            case 0x0:
+                JMP(instruction);
+                break;
+            case 0x1:
+                JEQ(instruction);
+                break;
+            case 0x2:
+                JLT(instruction);
+                break;
+            default:
+                break;
+            }
         }
         break;
     }
