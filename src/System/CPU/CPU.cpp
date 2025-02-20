@@ -309,6 +309,15 @@ void CPU::POP(uint16_t data) {
     setResultInRegister(memory->read(SP), dest);
 }
 
+void CPU::CMP(uint16_t data) {
+    data = applyMask(data);
+
+    auto [op1, op2] = getUnsignedOperandsFromData(data);
+
+    flags.Z = (op1 == op2) ? true : false;
+    flags.C = (op1 < op2) ? true : false;
+}
+
 void CPU::SHR(uint16_t data) {
     data = applyMask(data);
 
@@ -454,6 +463,7 @@ void CPU::execute(uint16_t instruction) {
                 POP(instruction);
                 break;
             case 0x3:
+                CMP(instruction);
                 break;
             default:
                 break;
