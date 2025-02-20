@@ -69,7 +69,7 @@ class CPU {
     void JMP(uint16_t data);
     void JEQ(uint16_t data);
     void JLT(uint16_t data);
-    void JGT();
+    void JGT(uint16_t data);
     void SHR(uint16_t data);
     void SHL(uint16_t data);
     void ROR(uint16_t data);

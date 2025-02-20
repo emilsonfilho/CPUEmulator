@@ -336,7 +336,12 @@ void CPU::JEQ(uint16_t data) {
 }
 
 void CPU::JLT(uint16_t data) {
-    if (!flags.Z and flags.C)
+    if (!flags.Z and flags.S)
+        JMP(data);
+}
+
+void CPU::JGT(uint16_t data) {
+    if (!flags.Z and !flags.S)
         JMP(data);
 }
 
