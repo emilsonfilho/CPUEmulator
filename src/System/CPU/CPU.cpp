@@ -323,7 +323,11 @@ void CPU::JMP(uint16_t data) {
 
     uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
 
-    PC = PC + immediate;
+    PC += immediate;
+}
+
+void CPU::JEQ(uint16_t data) {
+
 }
 
 void CPU::SHR(uint16_t data) {
@@ -544,7 +548,11 @@ void CPU::runProgram() {
             break;
         }
 
+        uint16_t oldPC = PC;
+
         execute(instruction);
-        PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
+
+        if (oldPC == PC)
+            PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
     }
 }
