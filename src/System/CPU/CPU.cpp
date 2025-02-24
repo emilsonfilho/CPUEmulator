@@ -589,11 +589,8 @@ void CPU::runProgram() {
             break;
         }
 
-        uint16_t oldPC = PC;
+        PC += 2;
 
         execute(instruction);
-
-        if (oldPC == PC)
-            PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
     }
 }

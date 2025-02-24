@@ -22,13 +22,13 @@ all: $(TARGET)
 # Linkagem final
 $(TARGET): $(OBJS)
 	@echo "Linkando $(TARGET)..."
-	$(CXX) $(CXXFLAGS) $(INCLUDETAGS) $^ -o $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDETAGS) $^ -o $@
 
 # Compilação de cada arquivo fonte
 $(BIN_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@echo "Compilando $<..."
-	$(CXX) $(CXXFLAGS) $(INCLUDETAGS) -c $< -o $@
+	@$(CXX) $(CXXFLAGS) $(INCLUDETAGS) -c $< -o $@
 
 # Limpeza dos arquivos gerados
 clean:
