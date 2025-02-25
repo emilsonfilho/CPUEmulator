@@ -451,7 +451,7 @@ uint8_t CPU::getLSB(uint16_t data) {
 CPU::CPU(Memory* memory): memory(memory) {}
 
 void CPU::loadProgram(const string& filename) {
-    ifstream file("programs/" + filename + ".txt");
+    ifstream file(Path::getFullPath(filename));
     if (!file.is_open()) {
         cerr << "Error: Nao foi possivel abrir o arquivo " << filename << endl;
         exit(1);

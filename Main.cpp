@@ -1,4 +1,5 @@
 #include "include/System/CPU/CPU.hpp"
+#include "include/Utils/GetProgramName.hpp"
 
 /**
  * Para usar o programa, basta compilar o código com o comando: make
@@ -13,7 +14,7 @@ int main() {
     Memory memory;
     CPU cpu(&memory);
 
-    cpu.loadProgram("program2");
+    cpu.loadProgram(getProgramName());
     cpu.runProgram();
 
     return 0;
