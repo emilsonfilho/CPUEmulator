@@ -331,6 +331,9 @@ void CPU::JMP(uint16_t data) {
 
     uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
 
+    if ((immediate & (1 << 8)) != 0)
+        immediate |= 0xFF00;
+
     PC += immediate;
 }
 

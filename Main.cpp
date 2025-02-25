@@ -13,7 +13,7 @@ int main() {
     Memory memory;
     CPU cpu(&memory);
 
-    cpu.loadProgram("program1");
+    cpu.loadProgram("program2");
     cpu.runProgram();
 
     return 0;

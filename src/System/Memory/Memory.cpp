@@ -10,13 +10,16 @@ string Memory::printMemory(uint16_t startAddr, uint16_t endAddr, bool stack) con
     ostringstream os;
     bool empty = true;
 
-    for (uint16_t i = startAddr; (stack ? i > endAddr : i < endAddr); stack ? i-- : i += 2) {
+    for (uint16_t i = startAddr + (stack ? 2 : 0); stack ? i <= endAddr : i < endAddr; i += 2) {
         // Verifica se a memória foi acessada
         bool accessed = indexesAccessed.find(i) != indexesAccessed.end();
 
         // Se a memória não foi acessada, coloca "<memory not used>"
-        if (accessed) {
+        if (!stack and accessed) {
             os << applyFormat(i, false) << ": "
+               << applyFormat(read(i)) << endl;
+        } else if (stack) {
+            os << applyFormat(i,false) << ": "
                << applyFormat(read(i)) << endl;
         }
 
