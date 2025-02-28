@@ -22,6 +22,8 @@ string CPU::generateLog() const {
     os << "FLAGS:\n"
        << flags.showFlags();
 
+    os << "------------------\n";
+
     return os.str();
 }
 
@@ -331,16 +333,21 @@ void CPU::JMP(uint16_t data) {
 
     uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
 
-    if ((immediate & (1 << 8)) != 0)
-        immediate |= 0xFF00;
+    if ((immediate & (1 << 8)) != 0) {
+        // Caso em que o JUMP é negativo
+        immediate |= 0xFE00; // Extendendo os bits, pois eles já são em complemento de dois
+    }
 
+    /**
+     * Pelo PDF, o programador já considera que o número a ser dado deve ser um número par.
+     * Além disso, o mesmo já considera que o PC aponta para a próxima posição
+     * Logo, podemos somar diret, uma vez que a extensão de sinal já foi feita
+     */
     PC += immediate;
 }
 
 void CPU::JEQ(uint16_t data) {
-    cout << "pelo menos fui chamado\n";
-    if (flags.Z) {
-        cout << "entrei\n";
+    if (flags.Z and !flags.S) {
         JMP(data);
     }
 }
