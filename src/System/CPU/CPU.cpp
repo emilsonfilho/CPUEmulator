@@ -22,6 +22,8 @@ string CPU::generateLog() const {
     os << "FLAGS:\n"
        << flags.showFlags();
 
+    os << "------------------\n";
+
     return os.str();
 }
 
@@ -118,6 +120,10 @@ void CPU::setResultInRegister(uint32_t result, uint16_t address) {
 
 uint16_t CPU::getULADestination(uint16_t data) {
     return (data & MASK_DEST) >> 8;
+}
+
+uint16_t CPU::getMemoryAddress(string data) {
+    return stoi(data.substr(0, 4), nullptr, 16);
 }
 
 uint8_t CPU::getShiftImmediate(uint16_t data) {
@@ -327,12 +333,23 @@ void CPU::JMP(uint16_t data) {
 
     uint16_t immediate = (data & IMMEDIATE_MASK_JUMPS) >> 2;
 
+    if ((immediate & (1 << 8)) != 0) {
+        // Caso em que o JUMP é negativo
+        immediate |= 0xFE00; // Extendendo os bits, pois eles já são em complemento de dois
+    }
+
+    /**
+     * Pelo PDF, o programador já considera que o número a ser dado deve ser um número par.
+     * Além disso, o mesmo já considera que o PC aponta para a próxima posição
+     * Logo, podemos somar diret, uma vez que a extensão de sinal já foi feita
+     */
     PC += immediate;
 }
 
 void CPU::JEQ(uint16_t data) {
-    if (flags.Z and !flags.S)
+    if (flags.Z and !flags.S) {
         JMP(data);
+    }
 }
 
 void CPU::JLT(uint16_t data) {
@@ -444,26 +461,31 @@ uint8_t CPU::getLSB(uint16_t data) {
 CPU::CPU(Memory* memory): memory(memory) {}
 
 void CPU::loadProgram(const string& filename) {
-    ifstream file("programs/" + filename + ".txt");
+    ifstream file(Path::getFullPath(filename));
     if (!file.is_open()) {
         cerr << "Error: Nao foi possivel abrir o arquivo " << filename << endl;
         exit(1);
     }
 
-    /* Assmimos que o programa sempe começa no 0x0000 */
+    /* Assumimos que o programa sempre começa no 0x0000 */
 
     string line;
     while (getline(file, line)) {
-        uint16_t memoryAddress = stoi(line.substr(0, 4), nullptr, 16); // Armazena em hexadecimal o endereco de memoriab
+        uint16_t memoryAddress = getMemoryAddress(line); // Armazena em hexadecimal o endereco de memória
         memory->indexesAccessed.insert(memoryAddress);
         memory->indexesAccessed.insert(memoryAddress + 1);
 
         memory->write(memoryAddress, stoi(line.substr(8, 4), nullptr, 16)); // Armazena já na memória o dado que eu quero e o próximo
+        lastInstruction = memoryAddress;
     }
 }
 
-
 void CPU::execute(uint16_t instruction) {
+    if (PC > lastInstruction) {
+        HALT();
+        return;
+    }
+
     uint8_t opcode = (instruction >> 12) & 0xF;
 
     switch (opcode)
@@ -521,7 +543,7 @@ void CPU::execute(uint16_t instruction) {
         break;
     }
     case 0x1:
-        MOV(instruction); // Talvez eu fça uma função para simplificar o processo de não mandar mais o bit que não precisa
+        MOV(instruction);
         break;
     case 0x2:
         STR(instruction);
@@ -580,11 +602,8 @@ void CPU::runProgram() {
             break;
         }
 
-        uint16_t oldPC = PC;
+        PC += 2;
 
         execute(instruction);
-
-        if (oldPC == PC)
-            PC += 2;  // Avança para a próxima instrução (assumindo instruções de 2 bytes)
     }
 }

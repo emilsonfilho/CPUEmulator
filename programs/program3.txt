@@ -1,0 +1,9 @@
+0000: 0x180A ; MOV R0, #0x0A   (R0 = 10)
+0002: 0x1914 ; MOV R1, #0x14   (R1 = 20)
+0004: 0x0001 ; PSH R0         (empilha R0)
+0006: 0x0005 ; PSH R1         (empilha R1)
+0008: 0x0000 
+000A: 0x0002 ; POP R0         (desempilha para R0)
+000C: 0x0102 ; POP R1         (desempilha para R1)
+000E: 0x0000 
+0010: 0xFFFF

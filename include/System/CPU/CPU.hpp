@@ -8,6 +8,7 @@
 #include "../Memory/Memory.hpp"
 #include "../../Masks/CPUMasks.hpp"
 #include "../../Utils/ClearTop4Bits.hpp"
+#include "../../Global/FilesPath.hpp"
 #include "Flags.hpp"
 #include "AddressOperands.hpp"
 #include "Operands.hpp"
@@ -22,6 +23,7 @@ class CPU {
     uint16_t PC = 0x0000;
     uint16_t SP = 0x8200;
     uint16_t IR = 0;
+    uint16_t lastInstruction = 0;
 
     Memory *memory;
     Flags flags;
@@ -37,6 +39,7 @@ class CPU {
     SignedOperands getSignedOperandsFromData(uint16_t data);
 
     uint16_t getULADestination(uint16_t data);
+    uint16_t getMemoryAddress(string data);
 
     void setResultInRegister(uint32_t result, uint16_t address);
 
