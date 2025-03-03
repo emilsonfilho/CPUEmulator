@@ -1,0 +1,6 @@
+0000: 0x180F   ; MOV R0, #0x0F (R0 = 15)
+0002: 0x1910   ; MOV R1, #0x10 (R1 = 16)
+0004: 0x5005   ; SUB R0, R0, R1 (R0 = R0 - R1 = 15 - 16 = -1)
+0006: 0xB001   ; SHR R0, #1 (Desloca R0 (0xFFFF) 1 bit para a direita = 0x7FFF)
+0008: 0x0000   ; NOP
+000A: 0xFFFF   ; HALT
